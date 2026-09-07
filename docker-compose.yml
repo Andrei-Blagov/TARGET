@@ -1,0 +1,46 @@
+services:
+  # ============================================================
+  # Backend API (FastAPI / Uvicorn)
+  # Меняйте image / container_name / порты при необходимости.
+  # Docker Hub: andreiblagov/backend:latest
+  # ============================================================
+  backend:
+    # Имя образа на Docker Hub (ник/репозиторий:тег)
+    image: andreiblagov/backend:latest
+    # Явное имя контейнера на сервере
+    container_name: target-backend
+    restart: unless-stopped
+    ports:
+      # host:container — снаружи API на порту 8000
+      - "8000:8000"
+    env_file:
+      # Путь к секретам на сервере (BASE_URL, OPENAI_API_KEY, …)
+      - .env
+    networks:
+      # Общая bridge-сеть с frontend
+      - target-net
+
+  # ============================================================
+  # Frontend (Nginx + собранный Vue)
+  # Docker Hub: andreiblagov/frontend:latest
+  # ============================================================
+  frontend:
+    image: andreiblagov/frontend:latest
+    container_name: target-frontend
+    restart: unless-stopped
+    ports:
+      # host:container — порт 80 на сервере занят Caddy (n8n), используем 8080
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - target-net
+
+# ============================================================
+# Общая bridge-сеть: контейнеры видят друг друга по имени сервиса
+# (frontend → http://backend:8000, как localhost между сервисами)
+# ============================================================
+networks:
+  target-net:
+    name: target-net
+    driver: bridge
