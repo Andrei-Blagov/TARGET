@@ -113,7 +113,3 @@ curl -X POST http://localhost:8000/llm/analyze-site \
 | `BOT_TOKEN` | (опционально) Telegram |
 
 `.env` не коммитится — используйте `.env.example`.
-
-## Лицензия
-
-Учебный проект.
